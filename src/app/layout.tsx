@@ -1,0 +1,324 @@
+"use client";
+
+import "./globals.css";
+
+import { config } from "@fortawesome/fontawesome-svg-core";
+import "@fortawesome/fontawesome-svg-core/styles.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFacebookSquare, faXTwitter, faInstagram, faTiktok, faLinkedin, faYoutube } from "@fortawesome/free-brands-svg-icons";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { SessionProvider, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { ToastContainer } from 'react-toastify';
+import Link from "next/link";
+import React, { useState } from "react";
+import RegisterSW from "@/components/RegisterSW";
+config.autoAddCss = false;
+
+// RootLayout avvolge l'app con il provider di sessione e il layout
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <SessionProvider>
+      <InnerLayout>{children}</InnerLayout>
+    </SessionProvider>
+  );
+}
+
+// InnerLayout contiene la navigazione, il footer e il contenuto principale
+function InnerLayout({ children }: { children: React.ReactNode }) {
+  const { data: session } = useSession();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // Scorri in alto se già nella home page
+  const handleScrollToTop = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (typeof window !== "undefined" && window.location.pathname === "/") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  // Scorri alla sezione mappa o naviga alla home page con ancora
+  const handleScrollToMap = () => {
+    if (typeof window !== "undefined") {
+      const targetId = "map-section";
+      if (window.location.pathname === "/") {
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: "smooth", block: "end" });
+        }
+      } else {
+        window.location.href = "/?scrollTo=map-section";
+      }
+    }
+  };
+
+  return (
+    <html lang="it">
+      <head>
+        <meta name="description" content="SmartWaste - La tua soluzione per la raccolta differenziata. Trova punti di raccolta, segnala problemi e contribuisci all'ambiente." />
+        <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.svg" />
+        <title>SmartWaste - Raccolta Differenziata Intelligente</title>
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+        <meta name="theme-color" content="#10b981" />
+      </head>
+      <body className="bg-stone-200 text-stone-900 select-none">
+        {/* <RegisterSW /> */}
+        {/* Barra di navigazione */}
+        <nav className="z-1000 w-full p-5 fixed flex justify-center items-center gap-5">
+          <div className="bg-stone-100/75 border-1 border-stone-100 px-2.5 backdrop-blur-xs shadow-sm rounded-3xl flex flex-col md:grid items-center transition duration-250 grid-cols-1 md:grid-cols-[1fr_auto_1fr] w-full lg:w-3/4 xl:w-2/3">
+            <div className="justify-evenly items-center text-stone-900 font-medium text-lg gap-3 text-center hidden md:flex">
+              <button onClick={handleScrollToMap} className="rounded-2xl transition duration-250 w-full py-3
+                                                            hover:bg-emerald-500 hover:text-stone-100
+                                                            active:bg-emerald-500 active:text-stone-100">
+                Mappa
+              </button>
+              <Link href="/collection-points" className="rounded-2xl transition duration-250 w-full py-3
+                                            hover:bg-emerald-500 hover:text-stone-100
+                                            active:bg-emerald-500 active:text-stone-100">
+                Punti Raccolta
+              </Link>
+            </div>
+
+            <div className="w-full md:w-auto flex flex-col justify-start md:justify-center items-center text-center">
+              <Link
+                href="/"
+                onClick={handleScrollToTop}
+                className="w-full md:w-auto text-3xl md:text-5xl font-bold px-6 pt-2 md:pb-4 text-stone-900">
+                Smart<span className="text-emerald-500">Waste</span>
+              </Link>
+
+              {/* Menu Mobile */}
+              <div className={`w-full flex md:hidden flex-col gap-2 overflow-hidden transition-all ${menuOpen ? "max-h-64 mt-2" : "max-h-0"}`}>
+                <div className="flex justify-evenly items-center text-stone-900 font-medium text-lg gap-2 text-center">
+                  {/* Primo blocco: navigazione */}
+                  <button
+                    onClick={e => { handleScrollToMap(); setMenuOpen(false); }}
+                    className="rounded-2xl transition duration-250 w-full py-3 hover:bg-emerald-500 hover:text-stone-100 active:bg-emerald-500 active:text-stone-100">
+                    Mappa
+                  </button>
+                  <Link
+                    href="/collection-points"
+                    onClick={() => setMenuOpen(false)}
+                    className="rounded-2xl transition duration-250 w-full py-3 hover:bg-emerald-500 hover:text-stone-100 active:bg-emerald-500 active:text-stone-100">
+                    Punti Raccolta
+                  </Link>
+                </div>
+                {/* Secondo blocco: auth/profilo */}
+                <div className="flex justify-evenly items-center text-stone-900 font-medium text-lg gap-2 text-center">
+                  {session ? (
+                    <>
+                      <button
+                        onClick={() => signOut({ callbackUrl: "/" })}
+                        className="rounded-2xl transition duration-250 w-full py-3 hover:bg-stone-900 hover:text-stone-100 active:bg-stone-900 active:text-stone-100">
+                        Esci
+                      </button>
+                      <Link
+                        href="/profile"
+                        onClick={() => setMenuOpen(false)}
+                        className="rounded-2xl transition duration-250 w-full py-3 hover:bg-emerald-500 hover:text-stone-100 active:bg-emerald-500 active:text-stone-100">
+                        Profilo
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        href="/register"
+                        onClick={() => setMenuOpen(false)}
+                        className="rounded-2xl transition duration-250 w-full py-3 hover:bg-stone-900 hover:text-stone-100 active:bg-stone-900 active:text-stone-100">
+                        Registrati
+                      </Link>
+                      <Link
+                        href="/login"
+                        onClick={() => setMenuOpen(false)}
+                        className="rounded-2xl transition duration-250 w-full py-3 hover:bg-emerald-500 hover:text-stone-100 active:bg-emerald-500 active:text-stone-100">
+                        Accedi
+                      </Link>
+                    </>
+                  )}
+                </div>
+              </div>
+              <div className="md:hidden w-full">
+                <FontAwesomeIcon
+                  icon={faChevronDown}
+                  className={`w-full pt-1 pb-2 transition-transform duration-200 cursor-pointer ${menuOpen ? "-scale-y-100" : ""}`}
+                  onClick={() => setMenuOpen((open) => !open)}
+                />
+              </div>
+            </div>
+
+            <div className="justify-evenly items-center text-stone-900 font-medium text-lg gap-3 text-center hidden md:flex">
+              {session ? (
+                <>
+                  <button
+                    onClick={() => signOut({ callbackUrl: "/" })}
+                    className="rounded-2xl transition duration-250 w-full py-3 
+                                                          hover:bg-stone-900 hover:text-stone-100
+                                                          active:bg-stone-900 active:text-stone-100">
+                    Esci
+                  </button>
+                  <Link href="/profile" className="rounded-2xl transition duration-250 w-full py-3 
+                                                  hover:bg-emerald-500 hover:text-stone-100
+                                                  active:bg-emerald-500 active:text-stone-100">
+                    Profilo
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/register" className="rounded-2xl transition duration-250 w-full py-3 
+                                                    hover:bg-stone-900 hover:text-stone-100
+                                                    active:bg-stone-900 active:text-stone-100">
+                    Registrati
+                  </Link>
+                  <Link href="/login" className="rounded-2xl transition duration-250 w-full py-3 
+                                                 hover:bg-emerald-500 hover:text-stone-100
+                                                 active:bg-emerald-500 active:text-stone-100">
+                    Accedi
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        </nav>
+
+        {children}
+
+        {/* Sezione Footer */}
+        <footer className="z-1000 w-full bg-stone-900 text-stone-100 p-5 lg:p-20 mt-10">
+          <div
+            className="flex gap-10 lg:gap-5 justify-between
+                          flex-col lg:flex-row items-start lg:items-center">
+            {/* Info Principali */}
+            <div className="flex flex-col gap-5">
+              <h1 className="text-4xl font-bold">
+                Smart<span className="text-emerald-400">Waste</span>
+              </h1>
+              {/* Numero di telefono di contatto */}
+              <p className="text-base lg:text-xl">
+                Chiamaci{" "}
+                <a
+                  href="tel:800515516"
+                  className="underline decoration-2 cursor-pointer transition
+                            hover:decoration-emerald-400
+                            active:decoration-emerald-400"
+                >
+                  800 515 516
+                </a>
+              </p>
+              <p className="text-base lg:text-xl">
+                Scrivici a{" "}
+                <a
+                  href="mailto:info@smartwaste.com"
+                  className="underline decoration-2 cursor-pointer transition
+                            hover:decoration-emerald-400
+                            active:decoration-emerald-400"
+                >
+                  info@smartwaste.com
+                </a>
+              </p>
+              {/* Icone social media */}
+              <div className="flex gap-2">
+                <FontAwesomeIcon
+                  icon={faXTwitter}
+                  className="aspect-square p-2 text-2xl cursor-pointer rounded-lg
+                            transition-all duration-150 ease-out active:scale-90 hover:scale-110
+                            hover:bg-emerald-400 hover:text-stone-900
+                            active:bg-emerald-400 active:text-stone-900"
+                />
+                <FontAwesomeIcon
+                  icon={faFacebookSquare}
+                  className="aspect-square p-2 text-2xl cursor-pointer rounded-lg
+                            transition-all duration-150 ease-out active:scale-90 hover:scale-110
+                            hover:bg-emerald-400 hover:text-stone-900
+                            active:bg-emerald-400 active:text-stone-900"
+                />
+                <FontAwesomeIcon
+                  icon={faLinkedin}
+                  className="aspect-square p-2 text-2xl cursor-pointer rounded-lg
+                            transition-all duration-150 ease-out active:scale-90 hover:scale-110
+                            hover:bg-emerald-400 hover:text-stone-900
+                            active:bg-emerald-400 active:text-stone-900"
+                />
+                <FontAwesomeIcon
+                  icon={faYoutube}
+                  className="aspect-square p-2 text-2xl cursor-pointer rounded-lg
+                            transition-all duration-150 ease-out active:scale-90 hover:scale-110
+                            hover:bg-emerald-400 hover:text-stone-900
+                            active:bg-emerald-400 active:text-stone-900"
+                />
+                <FontAwesomeIcon
+                  icon={faInstagram}
+                  className="aspect-square p-2 text-2xl cursor-pointer rounded-lg
+                            transition-all duration-150 ease-out active:scale-90 hover:scale-110
+                            hover:bg-emerald-400 hover:text-stone-900
+                            active:bg-emerald-400 active:text-stone-900"
+                />
+                <FontAwesomeIcon
+                  icon={faTiktok}
+                  className="aspect-square p-2 text-2xl cursor-pointer rounded-lg
+                            transition-all duration-150 ease-out active:scale-90 hover:scale-110
+                            hover:bg-emerald-400 hover:text-stone-900
+                            active:bg-emerald-400 active:text-stone-900"
+                />
+              </div>
+            </div>
+
+            {/* Iscrizione newsletter */}
+            <div className="flex flex-col justify-center w-full lg:w-auto gap-5 lg:gap-10">
+              <h2 className="font-bold text-lg lg:text-3xl">Iscriviti alla newsletter</h2>
+              <input
+                type="text"
+                placeholder="Inserisci la tua email..."
+                id="newsletter"
+                className="w-full outline-0 border-2 border-stone-100 rounded-2xl p-4 text-stone-900"
+              />
+              {/* gestione input email */}
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => {
+                    const input = document.getElementById(
+                      "newsletter"
+                    ) as HTMLInputElement;
+                    const email = input.value;
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    const messageElement = document.getElementById("message");
+                    if (emailRegex.test(email)) {
+                      if (messageElement) {
+                        messageElement.textContent =
+                          "Iscrizione completata!";
+                        messageElement.classList.add(
+                          "decoration-emerald-400"
+                        );
+                      }
+                    } else {
+                      if (messageElement) {
+                        messageElement.textContent = "Email non valida.";
+                        messageElement.classList.add("decoration-red-500");
+                      }
+                    }
+                  }}
+                  className="px-4 py-2 border-2 border-stone-100 rounded-2xl
+                            transition-all duration-150 ease-out active:scale-90 hover:scale-110
+                            hover:bg-stone-100 hover:text-stone-900
+                            active:bg-stone-100 active:text-stone-900
+                            ">
+                  Iscriviti
+                </button>
+                <p
+                  id="message"
+                  className="font-medium underline decoration-2
+                               text-sm lg:text-xl"
+                ></p>
+              </div>
+            </div>
+          </div>
+        </footer>
+        <ToastContainer position="bottom-right" />
+      </body>
+    </html >
+  );
+}
