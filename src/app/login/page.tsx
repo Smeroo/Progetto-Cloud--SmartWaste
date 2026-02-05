@@ -4,10 +4,10 @@ import { useAuthErrorMessage } from "@/lib/useAuthErrorMessage";
 import { signIn } from "next-auth/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faArrowRight, faEye, faEyeSlash, faLeaf } from "@fortawesome/free-solid-svg-icons";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 
-export default function LoginPage() {
+function LoginContent() {
   const [showPassword, setShowPassword] = useState(false);
   const errorMessage = useAuthErrorMessage();
 
@@ -144,5 +144,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-500 to-green-700"><div className="text-white text-xl">Caricamento...</div></div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

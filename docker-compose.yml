@@ -1,0 +1,47 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smartwaste-app
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-smartwaste}
+      - AUTH_SECRET=${AUTH_SECRET:-changeme_in_production}
+      - AUTH_URL=${AUTH_URL:-http://localhost:3000}
+      - NODE_ENV=production
+    networks:
+      - smartwaste-network
+    restart: always
+
+  db:
+    image: postgres:15-alpine
+    container_name: smartwaste-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+      - POSTGRES_DB=${POSTGRES_DB:-smartwaste}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - smartwaste-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U user -d smartwaste" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+volumes:
+  postgres_data:
+
+
+networks:
+  smartwaste-network:
+    driver: bridge

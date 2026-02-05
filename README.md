@@ -1,86 +1,146 @@
-# SmartWaste - Gestione Intelligente dei Rifiuti 🌱♻️
+# SmartWaste Cloud Native Application
 
-<div align="center">
-  <img src="https://img.shields.io/badge/Next.js-15.2-black?style=for-the-badge&logo=next.js" alt="Next.js"/>
-  <img src="https://img.shields.io/badge/TypeScript-5.8-blue?style=for-the-badge&logo=typescript" alt="TypeScript"/>
-  <img src="https://img.shields.io/badge/Prisma-6.5-2D3748?style=for-the-badge&logo=prisma" alt="Prisma"/>
-  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License"/>
-</div>
+## Descrizione del Progetto
+SmartWaste è un'applicazione web cloud-native progettata per localizzare punti di raccolta differenziata e fornire informazioni sullo smaltimento dei rifiuti.
+Questo progetto è un'evoluzione del Modulo 1, reingegnerizzata per soddisfare i requisiti **Cloud Native**:
+- **Microservizi/Containerizzazione**: L'intera applicazione è contenerizzata con Docker.
+- **Database Relazionale**: Migrazione da SQLite a **PostgreSQL** per la persistenza dei dati in produzione.
+- **Configuration Management**: Gestione della configurazione tramite variabili d'ambiente.
+- **Stateless Application**: Il core dell'applicazione è stateless e delega lo stato al database.
 
-## 📱 Cos'è SmartWaste?
+## Architettura
+L'architettura del sistema si basa su container Docker orchestrati tramite Docker Compose.
 
-SmartWaste è un'applicazione web e mobile che aiuta i cittadini a localizzare i punti di raccolta differenziata più vicini e fornisce informazioni dettagliate su come smaltire correttamente ogni tipo di rifiuto.
-
-## 🌱 Funzionalità principali
-
-### Per Cittadini 👥
-- 🔍 **Ricerca Intelligente**: "Dove butto le batterie?" - trova subito il punto più vicino
-- 🗺️ **Mappa Interattiva**: Visualizza tutti i punti di raccolta con codifica colori
-- ♻️ **Guide allo Smaltimento**: Istruzioni dettagliate per ogni tipo di rifiuto
-- 📅 **Orari di Raccolta**: Consulta quando sono aperti i centri di raccolta
-- 🚨 **Segnalazioni**: Cassonetti pieni? Danni? Segnala in un tap
-- 📍 **Geolocalizzazione**: Trova automaticamente i punti più vicini a te
-
-### Per Operatori/Comuni 🏛️
-- ➕ **Gestione Punti**: Aggiungi e modifica i punti di raccolta
-- 📊 **Dashboard Segnalazioni**: Monitora e gestisci le segnalazioni dei cittadini
-- ✏️ **Aggiornamenti Real-time**: Modifica orari e disponibilità
-- 📈 **Statistiche**: Analizza l'utilizzo del servizio
-
-## 🛠️ Stack Tecnologico
-
-### Frontend
-- **Next.js 15** - Framework React con App Router
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Styling moderno e responsive
-- **Leaflet** - Mappe interattive OpenStreetMap
-- **Font Awesome** - Iconografia ricca
-- **React Hook Form + Zod** - Gestione form e validazione
-- **React Toastify** - Notifiche eleganti
-
-### Backend
-- **Next.js API Routes** - RESTful API
-- **Prisma ORM** - Type-safe database queries
-- **SQLite** - Database (sviluppo) / PostgreSQL (produzione)
-- **Auth.js (NextAuth)** - Autenticazione completa
-  - OAuth (Google, GitHub)
-  - Credenziali con bcrypt
-- **Nominatim API** - Geocoding e ricerca indirizzi
-
-### PWA & Mobile
-- **Progressive Web App** - Installabile su tutti i dispositivi
-- **Service Worker** - Funzionalità offline
-- **Capacitor** - Build native iOS/Android
-
-## 📁 Struttura del Progetto
-
+```mermaid
+graph TD
+    Client[Client Browser/Mobile]
+    
+    subgraph "Docker Runtime"
+        NextJS[Service: app (Next.js)]
+        Postgres[(Service: db (PostgreSQL))]
+        Volume[Volume: postgres_data]
+    end
+    
+    Client -- HTTP:3000 --> NextJS
+    NextJS -- TCP:5432 --> Postgres
+    Postgres -- Persists --> Volume
 ```
-SmartWaste/
-├── prisma/
-│   ├── schema.prisma       # Schema del Database
-│   └── seed.ts             # Script di popolamento iniziale
-├── public/                 # Asset statici (immagini, icone)
-├── src/
-│   ├── app/                # Next.js App Router
-│   │   ├── api/            # API Endpoints
-│   │   ├── collection-points/ # Punti di raccolta
-│   │   ├── complete-profile/  # Completamento profilo
-│   │   ├── forgot-password/   # Recupero password
-│   │   ├── login/          # Login
-│   │   ├── register/       # Registrazione
-│   │   ├── reset-password/ # Reimpostazione password
-│   │   ├── profile/        # Profilo utente
-│   │   ├── waste-guide/    # Guida ai rifiuti
-│   │   ├── layout.tsx      # Layout principale
-│   │   └── page.tsx        # Homepage
-│   ├── components/         # Componenti React riutilizzabili
-│   ├── lib/                # Utility (db, auth, zed, ecc.)
-│   ├── services/           # Logica di business
-│   ├── types/              # Definizioni TypeScript
-│   ├── auth.ts             # Configurazione NextAuth
-│   └── middleware.ts       # Middleware di protezione
-├── .env                    # Variabili d'ambiente
-├── next.config.ts          # Configurazione Next.js
-├── package.json            # Dipendenze e script
-└── tsconfig.json           # Configurazione TypeScript
+
+### Componenti
+1.  **Frontend/Backend (Container `app`)**:
+    -   Framework: **Next.js 15**.
+    -   Funzioni: Rendering UI, API REST, Autenticazione (NextAuth.js).
+    -   ORM: **Prisma** per l'interazione con il database.
+    -   Entrypoint: Script custom per l'esecuzione automatica delle migrazioni all'avvio.
+
+2.  **Database (Container `db`)**:
+    -   Immagine: `postgres:15-alpine`.
+    -   Persistenza: Volume Docker `postgres_data` per garantire che i dati sopravvivano al riavvio dei container.
+
+## Requisiti
+-   **Docker Desktop** installato e in esecuzione.
+-   **Git**.
+
+## Installazione e Avvio (Build from Scratch)
+
+### 1. Clona il Repository
+```bash
+git clone <repository-url>
+cd Progetto-Cloud-SmartWaste
 ```
+
+### 2. Configura le Variabili d'Ambiente
+Copia il file di esempio `.env.example` in `.env`.
+Il file `.env` è configurato di default per funzionare con Docker Compose locale.
+
+```bash
+# Windows (PowerShell)
+copy .env.example .env
+
+# Mac/Linux
+cp .env.example .env
+```
+
+Assicurati che `DATABASE_URL` sia:
+```
+DATABASE_URL="postgresql://user:password@db:5432/smartwaste"
+```
+Se modifichi user/password nel `docker-compose.yml`, ricorda di aggiornarle anche qui.
+
+### 3. Avvia con Docker Compose
+Esegui il comando per costruire le immagini e avviare i container:
+
+```bash
+docker compose up --build
+```
+
+Al primo avvio, l'applicazione:
+1.  Scaricherà le immagini necessarie (Node.js, Postgres).
+2.  Costruirà l'immagine dell'applicazione Next.js (`smartwaste-app`).
+3.  Attenderà che il database sia pronto.
+4.  **Eseguirà automaticamente le migrazioni** del database (creazione tabelle).
+5.  Avvierà il server web sulla porta **3000**.
+
+### 4. Accedi all'Applicazione
+Apri il browser e naviga su:
+[http://localhost:3000](http://localhost:3000)
+
+## Credenziali di Prova
+Al primo avvio, il database viene popolato automaticamente con utenti di test:
+
+| Ruolo | Email | Password |
+|-------|-------|----------|
+| 👤 Utente | `mario.rossi@example.com` | `Password123!` |
+| 👤 Utente | `giulia.verdi@example.com` | `Password123!` |
+| 👨‍💼 Operatore | `operatore@smartwaste.it` | `Password123!` |
+
+Puoi anche registrare un nuovo utente dalla pagina di registrazione.
+
+## Scelte Progettuali e Cloud Native
+
+### Perché Next.js?
+Next.js permette di avere Frontend e Backend nello stesso artefatto, semplificando il deployment come singolo servizio stateless, pur mantenendo la flessibilità di separare le API se necessario.
+
+### Perché PostgreSQL?
+SQLite (usato in dev) non supporta la concorrenza e la persistenza corretta in ambienti containerizzati effimeri. PostgreSQL è lo standard de-facto per applicazioni cloud-native relazionali.
+
+### Gestione dei Segreti
+Nessun segreto è hardcodato. Tutti i valori sensibili (`Use`, `Password` DB, `AUTH_SECRET`) sono iniettati a runtime tramite `docker-compose.yml` o file `.env` non committati.
+
+### Persistenza
+I dati del database sono salvati in un **Docker Volume** (`postgres_data`). Questo garantisce che `docker compose down` e successivi `up` non causino la perdita dei dati degli utenti.
+
+## Comandi Utili
+
+**Fermare l'applicazione**
+```bash
+docker compose down
+```
+
+**Riavviare e forzare la rebuild**
+```bash
+docker compose up --build --force-recreate
+```
+
+**Visualizzare i log**
+```bash
+docker compose logs -f
+```
+
+## Struttura Repository
+- `/src`: Codice sorgente Next.js
+- `/prisma`: Schema del database e seed
+- `/docs`: Diagrammi architetturali
+- `/.github/workflows`: Pipeline CI/CD
+- `Dockerfile`: Definizione per la build dell'immagine app
+- `docker-compose.yml`: Orchestrazione dei container
+- `docker-entrypoint.sh`: Script di avvio per schema push e seed
+
+## CI/CD
+Il progetto include una pipeline GitHub Actions (`.github/workflows/ci.yml`) che:
+1. Esegue il linting del codice
+2. Costruisce l'applicazione Next.js
+3. Costruisce l'immagine Docker
+
+La pipeline viene eseguita automaticamente ad ogni push o pull request sul branch `main`.
+

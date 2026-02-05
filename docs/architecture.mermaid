@@ -1,0 +1,29 @@
+graph TD
+    Client[Client Browser/Mobile]
+    
+    subgraph "Docker Compose Environment"
+        subgraph "App Container - smartwaste-app"
+            NextJS["Next.js 15 (SSR)"]
+            API[API Routes]
+            Prisma[Prisma ORM]
+            NextAuth[NextAuth.js]
+        end
+        
+        subgraph "Database Container - smartwaste-db"
+            Postgres[(PostgreSQL 15)]
+        end
+        
+        Volume[(Docker Volume: postgres_data)]
+    end
+    
+    Client -->|HTTP :3000| NextJS
+    NextJS --> API
+    API --> NextAuth
+    API --> Prisma
+    Prisma -->|TCP :5432| Postgres
+    Postgres -->|Persist| Volume
+    
+    style NextJS fill:#0070f3,stroke:#fff,stroke-width:2px,color:#fff
+    style Postgres fill:#336791,stroke:#fff,stroke-width:2px,color:#fff
+    style Client fill:#f9f9f9,stroke:#333,stroke-width:2px
+    style Volume fill:#8B5CF6,stroke:#fff,stroke-width:2px,color:#fff
