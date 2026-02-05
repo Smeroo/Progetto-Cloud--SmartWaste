@@ -16,8 +16,8 @@ graph TD
     Client[Client Browser/Mobile]
     
     subgraph "Docker Runtime"
-        NextJS[Service: app (Next.js)]
-        Postgres[(Service: db (PostgreSQL))]
+        NextJS["Service: app (Next.js)"]
+        Postgres[("Service: db (PostgreSQL)")]
         Volume[Volume: postgres_data]
     end
     
