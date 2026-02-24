@@ -25,7 +25,9 @@ RUN npx prisma generate
 # Dummy secret for buildtime
 ENV AUTH_SECRET="dummy_secret_for_build"
 ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
-RUN npm run build
+RUN npm run build > /tmp/build.log 2>&1 || (cat /tmp/build.log && exit 1); \
+    cat /tmp/build.log | grep -v "Unknown at rule: @property" | grep -v "@property --motion" | grep -v "syntax: " | grep -v "inherits: false" | grep -v "initial-value:" | grep -v "Issue #"; \
+    rm /tmp/build.log
 
 # Production image, copy all the files and run next
 FROM base AS runner
