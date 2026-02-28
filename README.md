@@ -96,7 +96,6 @@ Il database viene popolato automaticamente con questi utenti di test:
 | Ruolo        | Email                      | Password       |
 | ------------ | -------------------------- | -------------- |
 | 👤 Utente    | `mario.rossi@example.com`  | `Password123!` |
-| 👤 Utente    | `giulia.verdi@example.com` | `Password123!` |
 | 👨‍💼 Operatore | `operatore@smartwaste.it`  | `Password123!` |
 
 Puoi anche registrare un nuovo utente dalla pagina di registrazione.
